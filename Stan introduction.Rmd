@@ -1,28 +1,52 @@
 ---
 title: "Stan Introduction"
-output: html_document
+output:
+  html_document: default
+  word_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+## The need for Stan
+Part of the difficulty of Bayesian statistics for us is the R is not equipped to handle some of the necessary procedures. For example, sampling from a posterior distribution is an essential part of Bayesian inference, but if we are using MCMC or a variation of it as part of our sampling (and we likely are) writing the code in R can be long and comlicated. Even running the code neccessary may take an impractical amount of time.
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+Stan is a programming language seperate from R designed to help in Bayesian analysis. Stan removes the dozens of lines of code that we would have needed to write, and instead asks for us to fill in three basics blocks of information: 'data', 'parameters', and 'model'.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+We'll explain more about each of these components and show how to use Stan within Rstudio with the example code below.
 
-```{r cars}
-summary(cars)
+
+```{r}
+# Run all R code in a new R script file called RStan_introduction
+# The package below will install Stan to Rstudio, and you will be able to create Stan files.
+install.packages("rstan", repos = "https://cloud.r-project.org/", dependencies = TRUE)
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r}
+pkgbuild::has_build_tools(debug = TRUE) 
+#This line should return output 'TRUE'
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+```{r}
+library(rstan)
+#If this is your first Rstan installation, restart R. If the installation has not gone correctly, a more in depth guide can be found at https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started
+```
+
+Now we should have rstan installed. Restart R! As with most new packages, this should get everything we need working.
+
+Go to the file tab in the top left corner of Rstudio. Select new file. You should now see 'Stan file' in this list. Select it, and return here.
+
+If Stan file is not an option, something went wrong in setup. Return to this website https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started for more help.
+
+If the Stan file is now open, perfect, leave it there for now. We need to make some fake data for our Stan model.
+
+```{r}
+
+```
+
+
