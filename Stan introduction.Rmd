@@ -3,13 +3,14 @@ title: "Stan Introduction"
 output:
   html_document: default
   word_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## The need for Stan
+## The Need for Stan
 Part of the difficulty of Bayesian statistics for us is the R is not equipped to handle some of the necessary procedures. For example, sampling from a posterior distribution is an essential part of Bayesian inference, but if we are using MCMC or a variation of it as part of our sampling (and we likely are) writing the code in R can be long and comlicated. Even running the code neccessary may take an impractical amount of time.
 
 Stan is a programming language seperate from R designed to help in Bayesian analysis. Stan removes the dozens of lines of code that we would have needed to write, and instead asks for us to fill in three basics blocks of information: 'data', 'parameters', and 'model'.
@@ -45,8 +46,65 @@ If Stan file is not an option, something went wrong in setup. Return to this web
 
 If the Stan file is now open, perfect, leave it there for now. We need to make some fake data for our Stan model.
 
-```{r}
+##Create our data
 
+```{r}
+N = 100
+Y = rnorm(N, 1.6, 0.2)
+hist(Y)
 ```
+
+So we have some very simple data that will work for our stan model. We have 100 data points, the data is normally distributed around a mean of 1.6, and has a standard deviation of 0.2. From here we will start building stan in your new stan file.
+
+Clear any default text out of your Stan file and paste the following.
+##Build Stan model
+
+data {
+
+}
+
+parameters {
+
+}
+
+model {
+
+}
+
+
+These are the blocks I referred to earlier, and are the most used. There are others you'll learn about later.
+Lets start with the first, data. Pretty straitforward, we need to tell the model what data we're working with. Down below you'll see how we format it.
+
+data {
+  int N; 
+  real Y[N];
+}
+
+parameters {
+
+}
+
+model {
+
+}
+
+
+First we include our sample size. int because we are dealing with integers, a discrete count. Second, our observations, Y[N]. Real because our data are continuous. N is in brackets to tell stan that we have an array of data points for N individuals (100 in this case).
+
+
+data {
+  int N; 
+  real Y[N];
+}
+
+parameters {
+  real mu;
+  real<lower=0> sigma
+}
+
+model {
+
+}
+
 
 
