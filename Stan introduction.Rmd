@@ -27,8 +27,8 @@ install.packages("rstan", repos = "https://cloud.r-project.org/", dependencies =
 
 
 ```{r}
-pkgbuild::has_build_tools(debug = TRUE) 
-#This line should return output 'TRUE'
+pkgbuild::has_build_tools(debug = TRUE) #This line should return output 'TRUE'
+
 ```
 
 
@@ -57,6 +57,8 @@ hist(Y)
 So we have some very simple data that will work for our stan model. We have 100 data points, the data is normally distributed around a mean of 1.6, and has a standard deviation of 0.2. From here we will start building stan in your new stan file.
 
 Clear any default text out of your Stan file and paste the following.
+
+
 ##Build Stan model
 
 data {
