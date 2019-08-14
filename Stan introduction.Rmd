@@ -1,9 +1,9 @@
 ---
 title: "Stan Introduction"
 output:
-  pdf_document: default
-  word_document: default
   html_document: default
+  word_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -11,6 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## The Need for Stan
+
 Part of the difficulty of Bayesian statistics for us is the R is not equipped to handle some of the necessary procedures. For example, sampling from a posterior distribution is an essential part of Bayesian inference, but if we are using MCMC or a variation of it as part of our sampling (and we likely are) writing the code in R can be long and comlicated. Even running the code neccessary may take an impractical amount of time.
 
 Stan is a programming language seperate from R designed to help in Bayesian analysis. Stan removes the dozens of lines of code that we would have needed to write, and instead asks for us to fill in three basics blocks of information: 'data', 'parameters', and 'model'.
@@ -49,10 +50,8 @@ If the Stan file is now open, perfect, save it as my_stan_model and leave it the
 ##Create our data
 
 ```{r}
-mymodeldata = list(
-N = 100,
+N = 100
 Y = rnorm(N, 1.6, 0.2)
-)
 hist(Y)
 ```
 
@@ -62,7 +61,6 @@ Clear any default text out of your Stan file and paste the following.
 
 
 ##Build Stan model
-
 
 Quick note, Stan files use double slash marks for comments // and lines within blocks should end with a semi colon ;.
 
@@ -141,18 +139,38 @@ The model block gets a little more complicated, as will parameters and data in m
 
 
 ##Using our Stan model in R
+
 Lets return to our Rscript.
 
 Since we already have the rstan library loaded, we can run our data through the stan model and look at some of the important results.
 
 ```{r}
+mymodeldata = list(
+  N = 100,
+  Y = rnorm(N, 1.6, 0.2)
+)
 fit = stan(
-  file = here::here("my_stan_model"),
+  file = here::here("my_stan_model.stan"),
   data = mymodeldata,
   seed = 42
 )
 ```
 
+The function stan can be manipulated in greater detail, but the only details we need to worry about now are correctly calling the stan model, entering our data as a list, and the seed just to make sure results are consistent and anyone running the code can know they ran everything corectly.
 
+The here::here line will be useful as we navigate directories in Github. For now, assuming that your Rscript and Stan file are in the same directory or project on your computer, you should only need to correctly spell the name of your Stan file.
 
+Now the object fit contains the results of running our data through our model. Let's check them out.
+```{r}
+print(fit)
+```
+Here we can see the estimated means for our parameters and diagnose our model for issues with convergence. You will learn more abot that later, but the model seems to have run correctly here. We can also look at the posterior with the following code.
+```{r}
+parametermu = extract(fit)$mu
+hist(parametermu)
+```
+Here we have a posterior distribtution for mu. Since our prior and simulated data were very similar, we see a very tight distribution, but again, try it with different means for both the sample and the prior, and see how the data interracts.
 
+##Conclusion
+
+This has been a very simple introdution to help you create a Stan model and using R to run data through it. Your future Stan models will be a lot more complex, but this example should help you see how models differ and the impact new code has going forward.
