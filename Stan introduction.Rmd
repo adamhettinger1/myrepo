@@ -143,6 +143,16 @@ The model block gets a little more complicated, as will parameters and data in m
 ##Using our Stan model in R
 Lets return to our Rscript.
 
+Since we already have the rstan library loaded, we can run our data through the stan model and look at some of the important results.
+
+```{r}
+fit = stan(
+  file = here::here("my_stan_model"),
+  data = mymodeldata,
+  seed = 42
+)
+```
+
 
 
 
