@@ -1,9 +1,9 @@
 ---
 title: "Stan Introduction"
 output:
-  html_document: default
-  word_document: default
   pdf_document: default
+  word_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -44,13 +44,15 @@ Go to the file tab in the top left corner of Rstudio. Select new file. You shoul
 
 If Stan file is not an option, something went wrong in setup. Return to this website https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started for more help.
 
-If the Stan file is now open, perfect, leave it there for now. We need to make some fake data for our Stan model.
+If the Stan file is now open, perfect, save it as my_stan_model and leave it there for now. We need to make some fake data for our Stan model.
 
 ##Create our data
 
 ```{r}
-N = 100
+mymodeldata = list(
+N = 100,
 Y = rnorm(N, 1.6, 0.2)
+)
 hist(Y)
 ```
 
@@ -60,6 +62,10 @@ Clear any default text out of your Stan file and paste the following.
 
 
 ##Build Stan model
+
+
+Quick note, Stan files use double slash marks for comments // and lines within blocks should end with a semi colon ;.
+
 
 data {
 
@@ -76,6 +82,7 @@ model {
 
 These are the blocks I referred to earlier, and are the most used. There are others you'll learn about later.
 Lets start with the first, data. Pretty straitforward, we need to tell the model what data we're working with. Down below you'll see how we format it.
+
 
 data {
   int N; 
@@ -101,12 +108,41 @@ data {
 
 parameters {
   real mu;
-  real<lower=0> sigma
+  real<lower=0> sigma;
 }
 
 model {
 
 }
+
+
+Our model section includes the parameters we are trying to estimate from our data. In our simple model here, we only are worried about mu and sigma. Both are continuous, so type real, but we want to make sure the model knows that sigma cannot be negative. Thus we add in the <lower=0> modifier. That's it for parameters.
+
+
+data {
+  int N; 
+  real Y[N];
+}
+
+parameters {
+  real mu;
+  real<lower=0> sigma;
+}
+
+model {
+  for(i in 1:N)
+    Y[i] ~ normal(mu, sigma);
+  mu ~ normal(1.7, 0.3)
+  sigma ~ cauchy(0, 1);
+}
+
+
+The model block gets a little more complicated, as will parameters and data in more complicated models that we will see later. For right now, this will do. We start by defining our likelyhood here, in which we make a for loop that will run all points of our data Y, assuming a normal distribution. Then we define our priors for both our parameters, mu and sigma. In this code, we assume a prior very close to our data, but tweek the numbers here to see how priors interact with the likelyhood.
+
+
+##Using our Stan model in R
+Lets return to our Rscript.
+
 
 
 
