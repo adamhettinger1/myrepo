@@ -89,9 +89,9 @@ Lets start with the first, data. Pretty straitforward, we need to tell the model
 
 
 ***
-data {
-  int N; 
-  real Y[N];
+data {  
+  int N;  
+  real Y[N];  
 }
 
 parameters {
@@ -108,14 +108,14 @@ First we include our sample size. int because we are dealing with integers, a di
 
 
 ***
-data {
-  int N; 
-  real Y[N];
+data {  
+  int N;  
+  real Y[N];  
 }
 
-parameters {
-  real mu;
-  real<lower=0> sigma;
+parameters {  
+  real mu;  
+  real<lower=0> sigma;  
 }
 
 model {
@@ -140,7 +140,7 @@ parameters {
 
 model {  
   for(i in 1:N)  
-    Y[i] ~ normal(mu, sigma);  
+   Y[i] ~ normal(mu, sigma);  
   mu ~ normal(1.7, 0.3)  
   sigma ~ cauchy(0, 1);  
 }  
