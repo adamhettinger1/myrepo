@@ -1,0 +1,173 @@
+---
+title: "Untitled"
+author: "Adam Hettinger"
+date: "1/15/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+```{}
+
+data{
+    int g[700];
+    vector[700] intent;
+    vector[700] price;
+    int brand[700];
+}
+parameters{
+    vector[5] alpha;
+    real beta;
+    real<lower=0,upper=3> sigma;
+}
+model{
+    vector[700] mu;
+    sigma ~ uniform( 0 , 3 );
+    beta ~ normal( 0.2 , 0.1 );
+    alpha ~ normal( 0.2 , 0.1 );
+    for ( i in 1:700 ) {
+        mu[i] = alpha[brand[i]] + beta * price[i];
+    }
+    intent ~ normal( mu , sigma );
+}
+
+```
+
+
+
+```{}
+# Observation model.
+intent_n ∼ Normal(mu_n, sigma)
+mu_n = alpha[g[n],] * brand_n + beta[g[n]] * price_n
+
+# Population model.
+alpha ∼ Normal(gamma, tau), for k = 1:3 and i = 1:5
+beta ~ Normal(gamma, tau), for k = 1:3
+
+# Hyperpriors and prior.
+gamma ∼ Normal(0.2, 0.1)
+tau ~ Uniform(0, 3)
+sigma ∼ Uniform(0, 3)
+```
+
+
+```{r}
+# Specify values to simulate data.
+library(tidyverse)
+library(rethinking)
+library(rstan)
+library(bayesplot)
+library(tidybayes)
+
+load(here::here("purchase_intent.RData"))
+
+
+sim_values <- list(
+  N = 100,                                       # Number of observations.
+  K = 3,                                         # Number of groups.
+  I = 5,                                         # Number of observation-level covariates.
+  
+  g = sample(3, 100, replace = TRUE),            # Vector of group assignments.
+  brand = as.integer(round(runif(N, 1, 5 - 1))), # Vector of brands covariates.
+  price = round(runif(N, 10, 30), 2),            # Vector of price covariates.
+  
+  gamma_mean = 0.2,                              # Mean for the hyperprior on gamma.
+  gamma_var = 0.1,                               # Variance for the hyperprior on gamma.
+  tau_min = 0,                                   # Minimum for the hyperprior on tau.
+  tau_max = 3,                                   # Maximum for the hyperprior on tau.
+  sigma_min = 0,                                 # Minimum for the hyperprior on tau.
+  sigma_max = 3                                  # Maximum for the hyperprior on tau.
+)
+
+# Generate data.
+sim_data <- stan(
+  file = here::here("generate_data.stan"),
+  data = sim_values,
+  iter = 10,
+  chains = 1,
+  seed = 42,
+  algorithm = "Fixed_param"
+)
+```
+
+
+
+```{r}
+# Extract the simulated data.
+prior_pc <- tibble(
+  intent = as.vector(extract(sim_data)$intent)
+)
+
+# Plot the prior predictive distribution.
+prior_pc %>% 
+  ggplot(aes(x = intent)) +
+  geom_density()
+```
+
+```{r}
+# Specify data.
+data <- list(
+  N = nrow(purchase_intent),                     # Number of observations.
+  K = max(purchase_intent$g),                    # Number of groups.
+  I = max(purchase_intent$brand) + 1,            # Number of observation-level covariates.
+  
+  intent = purchase_intent$intent,               # Vector of observations.
+  g = purchase_intent$g,                         # Vector of group assignments.
+  brand = purchase_intent$brand,                 # Vector of brands covariates.
+  price = purchase_intent$price,                 # Vector of price covariates.
+  
+  gamma_mean = 0,                                # Mean for the hyperprior on gamma.
+  gamma_var = 1,                                 # Variance for the hyperprior on gamma.
+  tau_min = 0,                                   # Minimum for the hyperprior on tau.
+  tau_max = 3,                                   # Maximum for the hyperprior on tau.
+  sigma_min = 0,                                 # Minimum for the hyperprior on tau.
+  sigma_max = 3                                  # Maximum for the hyperprior on tau.
+)
+
+# Calibrate the model.
+model03 <- stan(
+  file = here::here("hierarchical_model.stan"),
+  data = data,
+  control = list(adapt_delta = 0.99),
+  seed = 42
+)
+```
+
+
+
+```{r}
+# Posterior predictive check.
+post_pc03 <- tibble(
+  # Extract the posterior predicted values.
+  intent = as.vector(extract(model03)$intent_pc)
+)
+
+# Plot the posterior predictive distribution.
+ggplot(post_pc03, aes(x = intent)) +
+  geom_histogram() +
+  xlim(1, 10) 
+
+ggplot(purchase_intent, aes(x = intent)) +
+  geom_histogram() +
+  xlim(1, 10) 
+```
+
+
+```{r}
+model03 %>%
+  gather_draws(alpha[n, i]) %>%
+  unite(.variable, .variable, n, i) %>%
+  ggplot(aes(x = .value, y = .variable)) +
+  geom_halfeyeh(.width = .95) +
+  facet_wrap(
+    ~ .variable,
+    nrow = data$K,
+    ncol = (data$I - 1),
+    scales = "free"
+  )
+```
+
