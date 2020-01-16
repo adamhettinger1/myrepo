@@ -171,3 +171,19 @@ model03 %>%
   )
 ```
 
+
+```{r}
+# Plot the betas.
+model03 %>%
+  gather_draws(beta[i]) %>%
+  unite(.variable, .variable, i) %>%
+  ggplot(aes(x = .value, y = .variable)) +
+  geom_halfeyeh(.width = .95) +
+  facet_wrap(
+    ~ .variable,
+    nrow = data$K,
+    ncol = 1,
+    scales = "free"
+  )
+```
+
